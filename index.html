@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PrintCost Dashboard | ระบบติดตามต้นทุนโรงพิมพ์</title>
+  <link href="https://fonts.googleapis.com/css2?family=Sarabun:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <style>
+    :root {
+      --bg:      #f2f4f7;
+      --bg2:     #e8ebf0;
+      --card:    #ffffff;
+      --border:  #dde2ea;
+      --border2: #c8cfd9;
+      --text:    #1c2130;
+      --text2:   #5a6478;
+      --text3:   #9aa3b2;
+      --blue:    #2563eb;
+      --blue-lt: #eff6ff;
+      --green:   #16a34a;
+      --green-lt:#f0fdf4;
+      --red:     #dc2626;
+      --red-lt:  #fef2f2;
+      --amber:   #d97706;
+      --amber-lt:#fffbeb;
+      --shadow:  0 1px 4px rgba(0,0,0,.07), 0 4px 16px rgba(0,0,0,.06);
+      --shadow2: 0 2px 8px rgba(0,0,0,.1), 0 8px 32px rgba(0,0,0,.08);
+      --r:       10px;
+      --font:    'Sarabun', sans-serif;
+      /* category colors */
+      --c-paper:   #16a34a;
+      --c-ink:     #2563eb;
+      --c-foil:    #d97706;
+      --c-coating: #db2777;
+      --c-other:   #7c3aed;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: var(--font); background: var(--bg); color: var(--text); min-height: 100vh; font-size: 14px; }
+    a { color: var(--blue); text-decoration: none; }
+    a:hover { text-decoration: underline; }
+
+    /* ─── HEADER ─── */
+    .hdr {
+      background: #fff; border-bottom: 1px solid var(--border2);
+      height: 60px; padding: 0 1.5rem;
+      display: flex; align-items: center; justify-content: space-between;
+      position: sticky; top: 0; z-index: 300;
+      box-shadow: 0 1px 6px rgba(0,0,0,.08);
+    }
+    .hdr-brand { display: flex; align-items: center; gap: .7rem; }
+    .hdr-logo {
+      width: 38px; height: 38px; background: #1c2130;
+      border-radius: 9px; display: flex; align-items: center;
+      justify-content: center; font-size: 1.15rem;
+    }
+    .hdr-t1 { font-size: 1rem; font-weight: 800; color: var(--text); }
+    .hdr-t2 { font-size: .7rem; color: var(--text3); font-weight: 400; }
+    .hdr-r  { display: flex; align-items: center; gap: .9rem; }
+    .hdr-time { font-size: .7rem; color: var(--text3); text-align: right; line-height: 1.6; }
+    .btn-ref {
+      display: flex; align-items: center; gap: .38rem;
+      background: var(--text); color: #fff;
+      border: none; padding: .42rem .95rem; border-radius: 8px;
+      font-family: var(--font); font-weight: 700; font-size: .78rem;
+      cursor: pointer; transition: .18s;
+    }
+    .btn-ref:hover { background: #2c3a50; }
+    .btn-ref svg { transition: .3s; }
+    .btn-ref.spin svg { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ─── NAV ─── */
+    .nav {
+      background: #fff; border-bottom: 1px solid var(--border2);
+      padding: 0 1.5rem; display: flex;
+      overflow-x: auto; position: sticky; top: 60px; z-index: 200;
+    }
+    .ntab {
+      padding: .85rem 1.2rem; font-size: .86rem; font-weight: 700;
+      color: var(--text2); cursor: pointer;
+      border-bottom: 2.5px solid transparent; margin-bottom: -1px;
+      white-space: nowrap; transition: .15s;
+      background: none; border-left: none; border-right: none; border-top: none;
+      font-family: var(--font); display: flex; align-items: center; gap: .4rem;
+    }
+    .ntab:hover { color: var(--text); }
+    .ntab.on { color: var(--blue); border-bottom-color: var(--blue); }
+
+    /* ─── ALERT BANNER ─── */
+    .abar {
+      background: var(--amber-lt); border-left: 3px solid var(--amber);
+      padding: .6rem 1.5rem; display: flex; align-items: center;
+      gap: .7rem; font-size: .8rem; color: #92400e;
+    }
+    .abar.hide { display: none; }
+
+    /* ─── MAIN LAYOUT ─── */
+    .main { padding: 1.5rem; max-width: 1440px; margin: 0 auto; }
+    .sec { display: none; }
+    .sec.on { display: block; }
+
+    /* ─── STAT STRIP ─── */
+    .stat-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+    .stat-card {
+      background: var(--card); border-radius: var(--r); border: 1px solid var(--border);
+      padding: 1rem 1.15rem; box-shadow: var(--shadow); display: flex; align-items: center; gap: .8rem;
+    }
+    .stat-ico { width: 40px; height: 40px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; flex-shrink: 0; }
+    .stat-n  { font-size: 1.7rem; font-weight: 800; line-height: 1; }
+    .stat-l  { font-size: .72rem; color: var(--text3); margin-top: .12rem; }
+
+    /* ─── SECTION HEADER ─── */
+    .sec-hdr { margin-bottom: 1.1rem; }
+    .sec-hdr h2 { font-size: 1.15rem; font-weight: 800; }
+    .sec-hdr p  { font-size: .77rem; color: var(--text3); margin-top: .2rem; }
+
+    /* ─── CARD ─── */
+    .card {
+      background: var(--card); border-radius: var(--r);
+      border: 1px solid var(--border); box-shadow: var(--shadow);
+    }
+    .card-hdr {
+      padding: 1.1rem 1.3rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .card-hdr h3  { font-size: .9rem; font-weight: 800; }
+    .card-hdr p   { font-size: .72rem; color: var(--text3); margin-top: .1rem; }
+
+    /* ─── KPI GRID ─── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px,1fr)); gap: .9rem; margin-bottom: 1.25rem; }
+    .kpi-card {
+      background: var(--card); border-radius: var(--r);
+      border: 1px solid var(--border); padding: 1rem 1.1rem;
+      box-shadow: var(--shadow); transition: .18s; cursor: default;
+    }
+    .kpi-card:hover { box-shadow: var(--shadow2); transform: translateY(-1px); }
+    .kpi-cat   { font-size: .62rem; font-weight: 800; text-transform: uppercase; letter-spacing: .9px; color: var(--text3); }
+    .kpi-name  { font-size: .85rem; font-weight: 700; margin: .22rem 0 .45rem; display: flex; align-items: center; gap: .35rem; }
+    .kpi-price { font-size: 1.4rem; font-weight: 800; }
+    .kpi-unit  { font-size: .67rem; color: var(--text3); }
+    .kpi-chg   { display: flex; align-items: center; gap: .18rem; font-size: .75rem; font-weight: 700; margin-top: .45rem; }
+    .up  { color: var(--red); }
+    .dn  { color: var(--green); }
+    .eq  { color: var(--text3); }
+
+    /* ─── CHART GRID ─── */
+    .ch-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; margin-bottom: 1.1rem; }
+    .ch-wide { grid-column: 1/-1; }
+    .ch-body { padding: 1.1rem 1.25rem; }
+    .ch-wrap { position: relative; }
+    select.sel {
+      padding: .28rem .6rem; border: 1px solid var(--border2); border-radius: 6px;
+      font-family: var(--font); font-size: .76rem; color: var(--text2);
+      background: #fff; cursor: pointer; outline: none;
+    }
+    select.sel:focus { border-color: var(--blue); }
+
+    /* ─── CATEGORY SECTION HEADER (in price table) ─── */
+    .cat-section { margin-bottom: 1.5rem; }
+    .cat-header {
+      display: flex; align-items: center; gap: .65rem;
+      padding: .7rem 1rem; border-radius: var(--r);
+      margin-bottom: .6rem; cursor: pointer; user-select: none;
+    }
+    .cat-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .cat-name-lbl { font-size: .92rem; font-weight: 800; }
+    .cat-count { font-size: .72rem; color: var(--text3); }
+    .cat-arrow { margin-left: auto; font-size: .75rem; color: var(--text3); transition: .2s; }
+    .cat-section.collapsed .cat-arrow { transform: rotate(-90deg); }
+    .cat-section.collapsed .cat-body { display: none; }
+    .cat-body .card { margin-bottom: 0; }
+
+    /* ─── PRICE TABLE ─── */
+    .ptbl { width: 100%; border-collapse: collapse; }
+    .ptbl th {
+      padding: .65rem 1rem; text-align: left;
+      font-size: .67rem; font-weight: 800; text-transform: uppercase;
+      letter-spacing: .4px; color: var(--text3);
+      background: #fafbfc; border-bottom: 1px solid var(--border);
+    }
+    .ptbl td { padding: .78rem 1rem; font-size: .87rem; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    .ptbl tr:last-child td { border-bottom: none; }
+    .ptbl tr:hover td { background: #fafbfc; }
+    .mat-info { display: flex; align-items: center; gap: .65rem; }
+    .mat-ico  { width: 32px; height: 32px; border-radius: 7px; display: flex; align-items: center; justify-content: center; font-size: .95rem; flex-shrink: 0; }
+    .mat-nm   { font-weight: 700; font-size: .87rem; }
+    .mat-un   { font-size: .68rem; color: var(--text3); }
+    .p-val    { font-weight: 800; font-size: .95rem; }
+    .chgp     { display: inline-flex; align-items: center; gap: .15rem; padding: .16rem .45rem; border-radius: 20px; font-size: .72rem; font-weight: 800; }
+    .cup  { background: var(--red-lt);   color: var(--red);   }
+    .cdn  { background: var(--green-lt); color: var(--green); }
+    .ceq  { background: var(--bg);       color: var(--text3); }
+    .btn-edit { background: none; border: none; cursor: pointer; padding: .22rem; border-radius: 5px; font-size: .88rem; transition: .15s; opacity: .5; }
+    .btn-edit:hover { opacity: 1; background: var(--bg2); }
+    .btn-exp {
+      display: flex; align-items: center; gap: .35rem;
+      background: #f4f5f7; color: var(--text2); border: 1px solid var(--border2);
+      padding: .38rem .85rem; border-radius: 7px;
+      font-family: var(--font); font-weight: 700; font-size: .75rem;
+      cursor: pointer; transition: .15s;
+    }
+    .btn-exp:hover { background: var(--bg2); border-color: var(--border2); }
+
+    /* ─── SUPPLIER TAB ─── */
+    .sup-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; }
+    .sup-card {
+      background: var(--card); border-radius: var(--r);
+      border: 1px solid var(--border); box-shadow: var(--shadow); overflow: hidden; transition: .18s;
+    }
+    .sup-card:hover { box-shadow: var(--shadow2); }
+    .sup-top { padding: 1rem 1.1rem .8rem; border-bottom: 1px solid var(--border); }
+    .sup-cat-badge {
+      display: inline-flex; align-items: center; gap: .35rem;
+      font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .7px;
+      padding: .18rem .55rem; border-radius: 20px; margin-bottom: .55rem;
+    }
+    .sup-name  { font-size: .92rem; font-weight: 800; line-height: 1.3; margin-bottom: .2rem; }
+    .sup-short { font-size: .75rem; color: var(--text3); }
+    .sup-body  { padding: .85rem 1.1rem; display: flex; flex-direction: column; gap: .55rem; }
+    .sup-row   { display: flex; align-items: flex-start; gap: .55rem; font-size: .82rem; }
+    .sup-icon  { font-size: .9rem; flex-shrink: 0; margin-top: .05rem; }
+    .sup-txt   { color: var(--text2); line-height: 1.4; }
+    .sup-tags  { display: flex; flex-wrap: wrap; gap: .35rem; padding: 0 1.1rem .9rem; }
+    .stag      { background: var(--bg2); color: var(--text2); font-size: .68rem; font-weight: 600; padding: .18rem .55rem; border-radius: 20px; }
+    .sup-note  { font-size: .75rem; color: var(--text3); padding: 0 1.1rem .85rem; border-top: 1px solid var(--border); padding-top: .65rem; margin-top: .1rem; }
+
+    /* ─── REFERENCE SOURCES ─── */
+    .src-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: .9rem; margin-bottom: 1.25rem; }
+    .src-card {
+      background: var(--card); border-radius: var(--r);
+      border: 1px solid var(--border); padding: 1rem 1.15rem; box-shadow: var(--shadow);
+      display: flex; align-items: flex-start; gap: .75rem;
+    }
+    .src-ico { font-size: 1.3rem; flex-shrink: 0; margin-top: .05rem; }
+    .src-name { font-size: .88rem; font-weight: 800; }
+    .src-desc { font-size: .75rem; color: var(--text3); margin-top: .15rem; }
+    .src-link { font-size: .75rem; margin-top: .3rem; }
+
+    /* ─── UPDATE FORM ─── */
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.1rem; }
+    .fc {
+      width: 100%; padding: .52rem .8rem;
+      border: 1px solid var(--border2); border-radius: 7px;
+      font-family: var(--font); font-size: .88rem; color: var(--text);
+      outline: none; transition: .18s; background: #fff;
+    }
+    .fc:focus { border-color: var(--blue); }
+    .fc[readonly] { background: var(--bg); color: var(--text2); }
+    .fg { margin-bottom: .85rem; }
+    .fg label { display: block; font-size: .78rem; font-weight: 700; color: var(--text2); margin-bottom: .32rem; }
+    .btn-prim {
+      width: 100%; padding: .65rem; background: var(--text); color: #fff;
+      border: none; border-radius: 7px; font-family: var(--font);
+      font-size: .9rem; font-weight: 800; cursor: pointer; transition: .18s;
+    }
+    .btn-prim:hover { background: #2c3a50; }
+    .al-item { display: flex; align-items: center; justify-content: space-between; padding: .62rem 0; border-bottom: 1px solid var(--border); }
+    .al-item:last-child { border-bottom: none; }
+    input.thr {
+      width: 60px; padding: .26rem .45rem; border: 1px solid var(--border2);
+      border-radius: 6px; font-family: var(--font); font-size: .8rem;
+      text-align: center; outline: none;
+    }
+    input.thr:focus { border-color: var(--blue); }
+
+    /* ─── HISTORY TABLE ─── */
+    .hist-tbl { width: 100%; border-collapse: collapse; }
+    .hist-tbl th { padding: .62rem .9rem; text-align: left; font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .4px; color: var(--text3); background: #fafbfc; border-bottom: 1px solid var(--border); }
+    .hist-tbl td { padding: .68rem .9rem; border-bottom: 1px solid var(--border); font-size: .82rem; }
+    .hist-tbl tr:last-child td { border-bottom: none; }
+
+    /* ─── TOAST ─── */
+    .toast-wrap { position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 999; display: flex; flex-direction: column; gap: .45rem; }
+    .toast {
+      background: var(--text); color: #fff; padding: .78rem 1.1rem;
+      border-radius: 9px; box-shadow: var(--shadow2);
+      font-size: .82rem; font-weight: 600; max-width: 300px;
+      display: flex; align-items: center; gap: .6rem;
+      animation: toastIn .22s ease;
+    }
+    .toast.ok   { background: var(--green); }
+    .toast.warn { background: var(--amber); }
+    .toast.err  { background: var(--red);   }
+    @keyframes toastIn { from { transform: translateX(110%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+    /* ─── MISC ─── */
+    .divider { height: 1px; background: var(--border); margin: 1.1rem 0; }
+    .tag-row { display: flex; flex-wrap: wrap; gap: .4rem; }
+    .tag { background: var(--bg2); color: var(--text2); font-size: .7rem; font-weight: 700; padding: .18rem .55rem; border-radius: 20px; }
+
+    /* ─── RESPONSIVE ─── */
+    @media (max-width: 1024px) { .ch-grid { grid-template-columns: 1fr; } .form-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 768px) {
+      .stat-row { grid-template-columns: repeat(2, 1fr); }
+      .hdr-time { display: none; }
+      .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+      .main { padding: 1rem; }
+      .ptbl th:nth-child(5), .ptbl td:nth-child(5), .ptbl th:nth-child(6), .ptbl td:nth-child(6) { display: none; }
+      .sup-grid { grid-template-columns: 1fr; }
+    }
+    @media (max-width: 480px) {
+      .kpi-grid { grid-template-columns: 1fr; }
+      .btn-ref .lbl { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header class="hdr">
+  <div class="hdr-brand">
+    <div class="hdr-logo">🖨️</div>
+    <div>
+      <div class="hdr-t1">PrintCost Dashboard</div>
+      <div class="hdr-t2">ระบบติดตามต้นทุนวัตถุดิบโรงพิมพ์ไทย</div>
+    </div>
+  </div>
+  <div class="hdr-r">
+    <div class="hdr-time">
+      <div>อัพเดทล่าสุด</div>
+      <div id="updT">—</div>
+    </div>
+    <button class="btn-ref" id="refBtn" onclick="doRefresh()">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M1 4v6h6M23 20v-6h-6"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></svg>
+      <span class="lbl">รีเฟรชราคา</span>
+    </button>
+  </div>
+</header>
+
+<!-- ALERT -->
+<div id="abar" class="abar hide">
+  <span>⚠️</span>
+  <span id="atxt">มีราคาเปลี่ยนแปลงเกิน threshold</span>
+  <button onclick="this.parentElement.classList.add('hide')" style="margin-left:auto;background:none;border:none;cursor:pointer;font-size:1rem;color:#92400e">×</button>
+</div>
+
+<!-- NAV -->
+<nav class="nav">
+  <button class="ntab on" onclick="goTab('dash',this)">📊 ภาพรวม</button>
+  <button class="ntab" onclick="goTab('prices',this)">📋 ตารางราคา</button>
+  <button class="ntab" onclick="goTab('charts',this)">📈 กราฟ & วิเคราะห์</button>
+  <button class="ntab" onclick="goTab('suppliers',this)">🏭 ซัพพลายเออร์</button>
+  <button class="ntab" onclick="goTab('update',this)">✏️ อัพเดทราคา</button>
+</nav>
+
+<div class="main">
+
+  <!-- ══════════════════ DASHBOARD ══════════════════ -->
+  <div class="sec on" id="sec-dash">
+    <div class="stat-row">
+      <div class="stat-card">
+        <div class="stat-ico" style="background:#f0f4ff">📦</div>
+        <div><div class="stat-n" id="sTotal">0</div><div class="stat-l">วัตถุดิบทั้งหมด</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:var(--red-lt)">📈</div>
+        <div><div class="stat-n up" id="sUp">0</div><div class="stat-l">ราคาขึ้นวันนี้</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:var(--green-lt)">📉</div>
+        <div><div class="stat-n dn" id="sDn">0</div><div class="stat-l">ราคาลงวันนี้</div></div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-ico" style="background:var(--amber-lt)">🔔</div>
+        <div><div class="stat-n" style="color:var(--amber)" id="sAl">0</div><div class="stat-l">การแจ้งเตือน</div></div>
+      </div>
+    </div>
+
+    <div class="sec-hdr">
+      <h2>ราคาวัตถุดิบล่าสุด</h2>
+      <p>อัพเดทรายวัน — แบ่งตามหมวดหมู่ กระดาษ • หมึก • ปั๊มฟอยล์ • เคลือบ • อื่นๆ</p>
+    </div>
+    <div class="kpi-grid" id="kpiGrid"></div>
+
+    <div class="ch-grid">
+      <div class="card ch-wide">
+        <div class="card-hdr">
+          <div><h3>แนวโน้มราคา 30 วันย้อนหลัง</h3><p>เลือกหมวดที่ต้องการติดตาม</p></div>
+          <select class="sel" id="tSel" onchange="buildTrend('tC','tSel')">
+            <option value="paper">📄 กระดาษ</option>
+            <option value="ink">🎨 หมึกพิมพ์</option>
+            <option value="foil">✨ ปั๊มฟอยล์</option>
+            <option value="coating">💎 เคลือบ</option>
+            <option value="other">📦 อื่นๆ</option>
+          </select>
+        </div>
+        <div class="ch-body"><div class="ch-wrap" style="height:265px"><canvas id="tC"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><h3>สัดส่วนต้นทุนต่อเดือน</h3><p>ประมาณการตามปริมาณการใช้งานจริง</p></div></div>
+        <div class="ch-body"><div class="ch-wrap" style="height:260px"><canvas id="dC"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><h3>% เปลี่ยนแปลงราคาวันนี้</h3><p>เปรียบเทียบจากเมื่อวาน — ทุกวัตถุดิบ</p></div></div>
+        <div class="ch-body"><div class="ch-wrap" style="height:260px"><canvas id="chC"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ PRICES ══════════════════ -->
+  <div class="sec" id="sec-prices">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem">
+      <div class="sec-hdr" style="margin-bottom:0">
+        <h2>ตารางราคาวัตถุดิบ</h2>
+        <p>แบ่งตามหมวดหมู่ • คลิกหัวหมวดเพื่อยุบ/ขยาย</p>
+      </div>
+      <button class="btn-exp" onclick="doExport()">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export CSV
+      </button>
+    </div>
+    <div id="catSections"></div>
+  </div>
+
+  <!-- ══════════════════ CHARTS ══════════════════ -->
+  <div class="sec" id="sec-charts">
+    <div class="sec-hdr"><h2>กราฟ & วิเคราะห์เชิงลึก</h2><p>แนวโน้มราคา, เปรียบเทียบ, และการเปลี่ยนแปลง 7 วัน</p></div>
+    <div class="card" style="margin-bottom:1.1rem">
+      <div class="card-hdr">
+        <div><h3>แนวโน้มราคา 30 วัน — ละเอียด</h3><p>คลิกชื่อในตำนานเพื่อซ่อน/แสดงเส้นกราฟ</p></div>
+        <select class="sel" id="tSel2" onchange="buildTrend('tC2','tSel2')">
+          <option value="paper">📄 กระดาษ</option>
+          <option value="ink">🎨 หมึกพิมพ์</option>
+          <option value="foil">✨ ปั๊มฟอยล์</option>
+          <option value="coating">💎 เคลือบ</option>
+          <option value="other">📦 อื่นๆ</option>
+        </select>
+      </div>
+      <div class="ch-body"><div class="ch-wrap" style="height:320px"><canvas id="tC2"></canvas></div></div>
+    </div>
+    <div class="ch-grid">
+      <div class="card">
+        <div class="card-hdr"><div><h3>ราคากระดาษและหมึก เปรียบเทียบ</h3><p>ราคาปัจจุบัน บาท/หน่วย</p></div></div>
+        <div class="ch-body"><div class="ch-wrap" style="height:290px"><canvas id="barC"></canvas></div></div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><div><h3>สัดส่วนต้นทุนต่อเดือน</h3><p>ประมาณการตามการใช้งาน</p></div></div>
+        <div class="ch-body"><div class="ch-wrap" style="height:290px"><canvas id="dC2"></canvas></div></div>
+      </div>
+      <div class="card ch-wide">
+        <div class="card-hdr"><div><h3>% เปลี่ยนแปลงราคา 7 วัน</h3><p>แดง = ราคาขึ้น, เขียว = ราคาลง</p></div></div>
+        <div class="ch-body"><div class="ch-wrap" style="height:260px"><canvas id="chC2"></canvas></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════ SUPPLIERS ══════════════════ -->
+  <div class="sec" id="sec-suppliers">
+    <div class="sec-hdr"><h2>ซัพพลายเออร์วัตถุดิบในไทย</h2><p>รายชื่อโรงงาน ร้านค้า และบริษัทจำหน่ายวัตถุดิบงานพิมพ์ในประเทศไทย</p></div>
+
+    <!-- Sources -->
+    <div class="card" style="margin-bottom:1.25rem">
+      <div class="card-hdr"><div><h3>🔗 แหล่งอ้างอิงราคาและข้อมูลตลาด</h3><p>เว็บไซต์ที่ใช้ติดตามราคาวัตถุดิบงานพิมพ์</p></div></div>
+      <div style="padding:1.1rem 1.25rem">
+        <div class="src-grid" id="srcGrid"></div>
+        <p style="font-size:.72rem;color:var(--text3);margin-top:.5rem">* ราคาในระบบนี้เป็นข้อมูลจำลองเพื่อการสาธิต ควรตรวจสอบราคาจริงจากซัพพลายเออร์โดยตรง</p>
+      </div>
+    </div>
+
+    <div id="supSections"></div>
+  </div>
+
+  <!-- ══════════════════ UPDATE ══════════════════ -->
+  <div class="sec" id="sec-update">
+    <div class="sec-hdr"><h2>อัพเดทราคาวัตถุดิบ</h2><p>บันทึกราคาใหม่จากซัพพลายเออร์ และตั้งค่าการแจ้งเตือนเมื่อราคาเปลี่ยนแปลง</p></div>
+    <div class="form-grid">
+      <div class="card">
+        <div class="card-hdr"><h3>✏️ บันทึกราคาใหม่</h3></div>
+        <div style="padding:1.1rem 1.25rem">
+          <div class="fg"><label>เลือกวัตถุดิบ</label>
+            <select class="fc" id="upSel" onchange="onPickMat()"><option value="">— เลือกวัตถุดิบ —</option></select>
+          </div>
+          <div class="fg"><label>ราคาปัจจุบัน (อ้างอิง)</label><input class="fc" id="upCur" readonly placeholder="—"></div>
+          <div class="fg"><label>ราคาใหม่</label><input type="number" class="fc" id="upNew" placeholder="กรอกราคา" step="0.001" min="0"></div>
+          <div class="fg"><label>หน่วย</label><input class="fc" id="upUnit" readonly placeholder="—"></div>
+          <div class="fg"><label>แหล่งที่มา / หมายเหตุ</label><input class="fc" id="upNote" placeholder="เช่น ราคาจาก Double A รอบที่ 3/2025"></div>
+          <button class="btn-prim" onclick="doUpdate()">💾 บันทึกราคา</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-hdr"><h3>🔔 ตั้งค่าการแจ้งเตือน</h3></div>
+        <div style="padding:1.1rem 1.25rem">
+          <p style="font-size:.78rem;color:var(--text3);margin-bottom:.9rem">แจ้งเตือนเมื่อราคาเปลี่ยนแปลงเกินกว่า % ที่กำหนด</p>
+          <div id="alSet" style="max-height:300px;overflow-y:auto"></div>
+          <div class="divider"></div>
+          <div class="fg"><label>ตั้ง Threshold เดียวกันทุกรายการ (%)</label><input type="number" class="fc" id="gThr" value="5" min="1" max="50"></div>
+          <button class="btn-prim" onclick="applyGlobal()">ใช้ค่านี้กับทุกรายการ</button>
+        </div>
+      </div>
+    </div>
+    <div class="card" style="margin-top:1.1rem">
+      <div class="card-hdr"><h3>📜 ประวัติการอัพเดทราคา</h3></div>
+      <div id="histLog" style="padding:0"><div style="text-align:center;padding:2rem;color:var(--text3)">ยังไม่มีประวัติการอัพเดท</div></div>
+    </div>
+  </div>
+
+</div>
+<div class="toast-wrap" id="toasts"></div>
+
+<script>
+// ═══════════════════════════════════════════════════════
+// DATA — MATERIALS
+// ═══════════════════════════════════════════════════════
+const MATS = [
+  // กระดาษ
+  { id:'p1', name:'Art Card 260g',   cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:295,  ico:'📄' },
+  { id:'p2', name:'Art Card 350g',   cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:395,  ico:'📄' },
+  { id:'p3', name:'Offset 80g',      cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:178,  ico:'📃' },
+  { id:'p4', name:'Coated 115g',     cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:228,  ico:'📃' },
+  { id:'p5', name:'Kraft',           cat:'กระดาษ', ck:'paper',   unit:'บาท/กก.',    base:48,   ico:'📦' },
+  // หมึกพิมพ์
+  { id:'i1', name:'หมึก Cyan',       cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:398,  ico:'🔵' },
+  { id:'i2', name:'หมึก Magenta',    cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:415,  ico:'🔴' },
+  { id:'i3', name:'หมึก Yellow',     cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:368,  ico:'🟡' },
+  { id:'i4', name:'หมึก Black',      cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:298,  ico:'⚫' },
+  // ปั๊มฟอยล์
+  { id:'f1', name:'Gold Foil',       cat:'ปั๊มฟอยล์', ck:'foil', unit:'บาท/ตร.ซม.', base:0.85, ico:'✨' },
+  { id:'f2', name:'Silver Foil',     cat:'ปั๊มฟอยล์', ck:'foil', unit:'บาท/ตร.ซม.', base:0.72, ico:'⭐' },
+  { id:'f3', name:'ปั๊มนูน',         cat:'ปั๊มฟอยล์', ck:'foil', unit:'บาท/ตร.ซม.', base:0.65, ico:'🔲' },
+  // เคลือบ
+  { id:'c1', name:'เคลือบ UV',       cat:'เคลือบ', ck:'coating', unit:'บาท/ตร.ม.',  base:28,   ico:'💎' },
+  { id:'c2', name:'เคลือบเงา',       cat:'เคลือบ', ck:'coating', unit:'บาท/ตร.ม.',  base:18,   ico:'✨' },
+  { id:'c3', name:'เคลือบด้าน',      cat:'เคลือบ', ck:'coating', unit:'บาท/ตร.ม.',  base:20,   ico:'🔲' },
+  { id:'c4', name:'เคลือบซอฟต์ทัช', cat:'เคลือบ', ck:'coating', unit:'บาท/ตร.ม.',  base:42,   ico:'🤲' },
+  // อื่นๆ
+  { id:'o1', name:'กาว',             cat:'อื่นๆ', ck:'other',    unit:'บาท/กก.',    base:85,   ico:'🧴' },
+  { id:'o2', name:'เชือก/ริบบิ้น',   cat:'อื่นๆ', ck:'other',    unit:'บาท/ม้วน',   base:45,   ico:'🎀' },
+  { id:'o3', name:'บรรจุภัณฑ์',      cat:'อื่นๆ', ck:'other',    unit:'บาท/ชิ้น',   base:12,   ico:'📦' },
+];
+
+// Monthly cost estimate (for donut proportion)
+const MONTHLY = { paper:42000, ink:28000, foil:8500, coating:14000, other:5500 };
+
+// Category meta
+const CAT_META = {
+  paper:   { label:'กระดาษ',     ico:'📄', clr:'#16a34a', bg:'#f0fdf4', tc:'#14532d' },
+  ink:     { label:'หมึกพิมพ์',  ico:'🎨', clr:'#2563eb', bg:'#eff6ff', tc:'#1e3a8a' },
+  foil:    { label:'ปั๊มฟอยล์',  ico:'✨', clr:'#d97706', bg:'#fffbeb', tc:'#78350f' },
+  coating: { label:'เคลือบ',     ico:'💎', clr:'#db2777', bg:'#fdf2f8', tc:'#831843' },
+  other:   { label:'อื่นๆ',      ico:'📦', clr:'#7c3aed', bg:'#faf5ff', tc:'#4c1d95' },
+};
+
+// ─── SUPPLIERS ───────────────────────────────────────────────
+const SUPPLIERS = {
+  paper: {
+    label: 'กระดาษ', ico: '📄',
+    items: [
+      { name:'บริษัท ดั๊บเบิ้ล เอ (1991) จำกัด (มหาชน)', short:'Double A',
+        area:'โรงงาน: สระบุรี | สำนักงาน: กรุงเทพฯ',
+        phone:'036-209-500', web:'www.doubleapaper.com',
+        products:['Art Card','Offset Paper','Copy Paper','Coated Paper'],
+        note:'ผู้ผลิตกระดาษรายใหญ่ที่สุดในไทย ส่งออกกว่า 100 ประเทศ' },
+      { name:'บริษัท สยามเปเปอร์ จำกัด', short:'Siam Paper Group',
+        area:'กรุงเทพฯ',
+        phone:'02-936-1000', web:'www.siampaper.co.th',
+        products:['Art Paper','Coated Paper','Specialty Paper'],
+        note:'กระดาษงานพิมพ์คุณภาพสูง หลากหลายแกรม' },
+      { name:'บริษัท ฟินิคซ พัลพ แอนด์ เพเพอร์ จำกัด (มหาชน)', short:'Phoenix Paper',
+        area:'ขอนแก่น',
+        phone:'043-227-711', web:'www.phoenixpulp.co.th',
+        products:['Kraft','Unbleached Paper','Packaging Paper'],
+        note:'ผู้ผลิตกระดาษ Kraft และบรรจุภัณฑ์ขนาดใหญ่' },
+      { name:'บริษัท เอสซีจี แพคเกจจิ้ง จำกัด (มหาชน)', short:'SCG Packaging',
+        area:'กรุงเทพฯ / ทั่วประเทศ',
+        phone:'02-586-2024', web:'www.scgpackaging.com',
+        products:['Kraft','Corrugated Board','Packaging Paper'],
+        note:'กระดาษและบรรจุภัณฑ์ครบวงจร เครือซิเมนต์ไทย' },
+      { name:'ตลาดกระดาษบ้านหม้อ', short:'บ้านหม้อ Market',
+        area:'ถนนบ้านหม้อ แขวงวังบูรพาภิรมย์ กรุงเทพฯ',
+        phone:'(สอบถามแต่ละร้านในตลาด)', web:'-',
+        products:['กระดาษทุกชนิด','กระดาษส่ง','วัสดุงานพิมพ์'],
+        note:'ตลาดกระดาษขายส่งใหญ่ที่สุดในกรุงเทพฯ เปิดทุกวัน' },
+    ]
+  },
+  ink: {
+    label: 'หมึกพิมพ์', ico: '🎨',
+    items: [
+      { name:'บริษัท โตโย อิ้งค์ (ประเทศไทย) จำกัด', short:'Toyo Ink Thailand',
+        area:'นิคมอุตสาหกรรมบางปู สมุทรปราการ',
+        phone:'02-324-0530', web:'www.toyoink.co.th',
+        products:['UV Offset Ink','Sheetfed Ink','Flexo Ink','Digital Ink'],
+        note:'ผู้นำด้านหมึกพิมพ์จากญี่ปุ่น ครบทุกกระบวนการพิมพ์' },
+      { name:'บริษัท ดิค กราฟฟิค (ประเทศไทย) จำกัด', short:'DIC Thailand',
+        area:'ชลบุรี',
+        phone:'038-490-301', web:'www.dic-global.com',
+        products:['Offset Ink','Gravure Ink','Specialty Ink'],
+        note:'DIC Corporation จากญี่ปุ่น หมึกคุณภาพสูง ค่าเฉดสีแม่นยำ' },
+      { name:'บริษัท ซีกแวร์ค (ประเทศไทย) จำกัด', short:'Siegwerk Thailand',
+        area:'สมุทรปราการ',
+        phone:'02-316-8800', web:'www.siegwerk.com',
+        products:['Packaging Ink','UV Ink','Water-based Ink','Flexo Ink'],
+        note:'หมึกพิมพ์บรรจุภัณฑ์อาหาร มาตรฐานความปลอดภัยสูง' },
+      { name:'บริษัท ซัน เคมิคอล (ประเทศไทย) จำกัด', short:'Sun Chemical',
+        area:'ปทุมธานี',
+        phone:'02-992-5780', web:'www.sunchemical.com',
+        products:['Sheetfed Ink','Web Offset Ink','UV Ink','Coatings'],
+        note:'ผู้ผลิตหมึกและสีชั้นนำของโลก ฐานการผลิตในไทย' },
+      { name:'บริษัท ฟลินท์ กรุ๊ป (ประเทศไทย) จำกัด', short:'Flint Group',
+        area:'สมุทรปราการ',
+        phone:'02-750-3700', web:'www.flintgroup.com',
+        products:['Offset Ink','Flexo Ink','Gravure Ink','Varnish'],
+        note:'กลุ่มบริษัทหมึกพิมพ์ระดับโลก ครอบคลุมทุกประเภทการพิมพ์' },
+    ]
+  },
+  foil: {
+    label: 'ปั๊มฟอยล์/ปั๊มนูน', ico: '✨',
+    items: [
+      { name:'บริษัท เคิร์ซ (ประเทศไทย) จำกัด', short:'KURZ Thailand',
+        area:'กรุงเทพฯ',
+        phone:'02-650-7500', web:'www.kurz.de',
+        products:['Hot Stamping Foil','Cold Foil','Holographic Foil','Security Foil'],
+        note:'แบรนด์ฟอยล์ชั้นนำระดับโลก ตัวแทนจำหน่ายในไทย' },
+      { name:'บริษัท เอพีไอ (ประเทศไทย) จำกัด', short:'API Thailand',
+        area:'กรุงเทพฯ',
+        phone:'02-xxx-xxxx', web:'www.api-foils.com',
+        products:['Foil Stamping','Security Features','Holographic Labels'],
+        note:'API Group จากอังกฤษ เชี่ยวชาญฟอยล์ป้องกันการปลอมแปลง' },
+      { name:'บริษัท แทรนส์เฟิร์ม เทรดดิ้ง จำกัด', short:'Transferm',
+        area:'กรุงเทพฯ',
+        phone:'02-xxx-xxxx', web:'-',
+        products:['Gold Foil','Silver Foil','Color Foil','Rainbow Foil'],
+        note:'จำหน่ายฟอยล์งานพิมพ์ทุกสีทุกลาย ราคาส่ง' },
+      { name:'ร้านค้าย่านมหานาค / บ้านหม้อ', short:'ร้านค้าย่านมหานาค',
+        area:'ถนนมหานาค / บ้านหม้อ กรุงเทพฯ',
+        phone:'(สอบถามแต่ละร้าน)', web:'-',
+        products:['Hot Foil','ฟอยล์ทุกสี','เม็ดพลาสติกนูน'],
+        note:'แหล่งซื้อฟอยล์และวัสดุปั๊มราคาส่งกลางกรุงเทพฯ' },
+    ]
+  },
+  coating: {
+    label: 'เคลือบและวาร์นิช', ico: '💎',
+    items: [
+      { name:'บริษัท มิเชลแมน (ประเทศไทย) จำกัด', short:'Michelman',
+        area:'กรุงเทพฯ',
+        phone:'02-xxx-xxxx', web:'www.michelman.com',
+        products:['UV Coating','Water-based Coating','Soft Touch','Matte Coating'],
+        note:'สารเคลือบผิวคุณภาพสูง เชี่ยวชาญด้านฟังก์ชั่นพิเศษ' },
+      { name:'บริษัท ฟลินท์ กรุ๊ป (ประเทศไทย) จำกัด', short:'Flint Group',
+        area:'สมุทรปราการ',
+        phone:'02-750-3700', web:'www.flintgroup.com',
+        products:['Varnish','Gloss Coating','Matte Coating','UV Coating'],
+        note:'วาร์นิชและสารเคลือบผิวครบวงจร รับงานทุกปริมาณ' },
+      { name:'บริษัท ซีกแวร์ค (ประเทศไทย) จำกัด', short:'Siegwerk Thailand',
+        area:'สมุทรปราการ',
+        phone:'02-316-8800', web:'www.siegwerk.com',
+        products:['Aqueous Coating','UV Coating','Primer'],
+        note:'สารเคลือบสำหรับงานพิมพ์บรรจุภัณฑ์โดยเฉพาะ' },
+      { name:'บริษัท โตโย อิ้งค์ (ประเทศไทย) จำกัด', short:'Toyo Ink Thailand',
+        area:'สมุทรปราการ',
+        phone:'02-324-0530', web:'www.toyoink.co.th',
+        products:['UV Varnish','Gloss OPV','Soft Touch Coating'],
+        note:'สารเคลือบผิวครบวงจร จากผู้ผลิตหมึกพิมพ์ชั้นนำ' },
+    ]
+  },
+  other: {
+    label: 'วัตถุดิบอื่นๆ', ico: '📦',
+    items: [
+      { name:'บริษัท เฮนเกิล (ประเทศไทย) จำกัด', short:'Henkel Thailand',
+        area:'ปทุมธานี',
+        phone:'02-909-8686', web:'www.henkel.com/th-th',
+        products:['Hot Melt Glue','PVA Glue','กาวงานพิมพ์','กาวบรรจุภัณฑ์'],
+        note:'Henkel AG แบรนด์กาวระดับโลก Loctite / Technomelt / Dorus' },
+      { name:'บริษัท เอช.บี.ฟูลเลอร์ (ประเทศไทย) จำกัด', short:'H.B. Fuller',
+        area:'สมุทรปราการ',
+        phone:'02-750-xxxx', web:'www.hbfuller.com',
+        products:['Hot Melt Adhesive','Water-based Glue','กาวเข้าเล่ม'],
+        note:'ผู้เชี่ยวชาญกาวสำหรับอุตสาหกรรมบรรจุภัณฑ์และการพิมพ์' },
+      { name:'บริษัท เอสซีจี แพคเกจจิ้ง จำกัด (มหาชน)', short:'SCG Packaging',
+        area:'กรุงเทพฯ / ทั่วประเทศ',
+        phone:'02-586-2024', web:'www.scgpackaging.com',
+        products:['กล่องลูกฟูก','ถาดพลาสติก','บรรจุภัณฑ์ครบวงจร'],
+        note:'บรรจุภัณฑ์ครบวงจร เครือ SCG มีสาขาทั่วประเทศ' },
+      { name:'บริษัท ซีพี ออลล์ บิซิเนส (กาว/ริบบิ้น)', short:'ร้านวัสดุสำนักงาน',
+        area:'ทั่วประเทศ',
+        phone:'-', web:'-',
+        products:['ริบบิ้น','เชือก','เทปกาว','วัสดุเสริม'],
+        note:'วัสดุเสริมงานพิมพ์ หาซื้อได้ที่ตลาดบ้านหม้อ หรือตลาดแถวย่านโบ๊เบ๊ กรุงเทพฯ' },
+    ]
+  }
+};
+
+// ─── PRICE REFERENCE SOURCES ──────────────────────────────────
+const SOURCES = [
+  { ico:'🏛️', name:'สมาคมการพิมพ์ไทย (TPA)', desc:'ข้อมูลอุตสาหกรรมการพิมพ์และราคากระดาษ', url:'https://www.tpa.or.th' },
+  { ico:'🏢', name:'กรมการค้าภายใน', desc:'ราคาสินค้า วัตถุดิบ และสินค้าอุปโภคบริโภค', url:'https://www.dit.go.th' },
+  { ico:'🌲', name:'สมาคมอุตสาหกรรมกระดาษไทย (TPPA)', desc:'ราคาเยื่อกระดาษและกระดาษในตลาดไทย', url:'https://www.tppa.or.th' },
+  { ico:'📊', name:'FOEX Indexes', desc:'ดัชนีราคากระดาษและเยื่อกระดาษโลก (อ้างอิงสากล)', url:'https://www.foex.fi' },
+  { ico:'📰', name:'Fastmarkets RISI', desc:'ข่าวสารและราคาอุตสาหกรรมกระดาษระดับโลก', url:'https://www.fastmarkets.com/forest-products/' },
+  { ico:'🏪', name:'Double A — ราคากระดาษ', desc:'ราคากระดาษจากผู้ผลิตโดยตรง', url:'https://www.doubleapaper.com' },
+];
+
+// ═══════════════════════════════════════════════════════
+// PRICE HISTORY GENERATOR
+// ═══════════════════════════════════════════════════════
+function genHist(base, days=30) {
+  let p = base, h = [];
+  for (let i = days; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    p = Math.max(base*0.75, p + (Math.random()-0.48)*0.025*p);
+    h.push({ date: d.toISOString().slice(0,10), price: Math.round(p*1000)/1000 });
+  }
+  return h;
+}
+const HIST = {}; MATS.forEach(m => { HIST[m.id] = genHist(m.base); });
+const THRESH = {}; MATS.forEach(m => { THRESH[m.id] = 5; });
+const LOG = [];
+let curCat = null;
+
+// ═══════════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════════
+const latest = id => HIST[id].at(-1).price;
+const prev  = (id,d=1) => { const i=HIST[id].length-1-d; return i>=0?HIST[id][i].price:HIST[id][0].price; };
+const pctChg = (id,d=1) => ((latest(id)-prev(id,d))/prev(id,d))*100;
+const fmtP  = v => v>=1 ? v.toLocaleString('th-TH',{minimumFractionDigits:2,maximumFractionDigits:2}) : v.toFixed(3);
+const fmtC  = v => (v>0?'+':'')+v.toFixed(2)+'%';
+const catOf = ck => CAT_META[ck];
+
+function toast(msg, type='ok') {
+  const el = document.createElement('div');
+  el.className = `toast ${type}`;
+  el.innerHTML = `<span>${type==='ok'?'✅':type==='warn'?'⚠️':'❌'}</span>${msg}`;
+  document.getElementById('toasts').appendChild(el);
+  setTimeout(()=>el.remove(), 3500);
+}
+function updTime() {
+  document.getElementById('updT').textContent =
+    new Date().toLocaleString('th-TH',{day:'2-digit',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+function get30Labels() {
+  return Array.from({length:31},(_,i)=>{ const d=new Date(); d.setDate(d.getDate()-(30-i)); return d.toLocaleDateString('th-TH',{day:'numeric',month:'short'}); });
+}
+
+// ═══════════════════════════════════════════════════════
+// CHART INSTANCES
+// ═══════════════════════════════════════════════════════
+const CI = {};
+const PAL = ['#1d4ed8','#16a34a','#d97706','#dc2626','#7c3aed','#0891b2','#be185d','#065f46','#92400e','#1e3a8a'];
+function dc(key) { if(CI[key]){CI[key].destroy();delete CI[key];} }
+
+function buildTrend(cid, sid) {
+  const ck = document.getElementById(sid).value;
+  const mats = MATS.filter(m=>m.ck===ck);
+  dc(cid);
+  CI[cid] = new Chart(document.getElementById(cid), {
+    type:'line',
+    data:{
+      labels:get30Labels(),
+      datasets: mats.map((m,i)=>({
+        label:m.name, data:HIST[m.id].map(h=>h.price),
+        borderColor:PAL[i], backgroundColor:PAL[i]+'12',
+        borderWidth:2, pointRadius:0, pointHoverRadius:4,
+        tension:.4, fill:false
+      }))
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:11,padding:11,font:{family:'Sarabun',size:11}}},
+        tooltip:{callbacks:{label:c=>` ${c.dataset.label}: ฿${fmtP(c.raw)}`}}
+      },
+      scales:{
+        x:{grid:{color:'#f0f0f0'},ticks:{maxTicksLimit:8,font:{family:'Sarabun',size:10},maxRotation:0}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Sarabun',size:10},callback:v=>'฿'+(v>=1?v.toLocaleString():v.toFixed(3))}}
+      }
+    }
+  });
+}
+
+function buildDonut(cid) {
+  const keys=['paper','ink','foil','coating','other'];
+  const labels=keys.map(k=>CAT_META[k].label);
+  const clrs=keys.map(k=>CAT_META[k].clr+'cc');
+  const vals=keys.map(k=>MONTHLY[k]);
+  const total=vals.reduce((a,b)=>a+b,0);
+  dc(cid);
+  CI[cid] = new Chart(document.getElementById(cid), {
+    type:'doughnut',
+    data:{ labels, datasets:[{ data:vals, backgroundColor:clrs, borderWidth:3, borderColor:'#fff', hoverOffset:8 }] },
+    options:{
+      responsive:true, maintainAspectRatio:false, cutout:'62%',
+      plugins:{
+        legend:{position:'bottom',labels:{boxWidth:11,padding:11,font:{family:'Sarabun',size:11}}},
+        tooltip:{callbacks:{label:c=>{const p=((c.raw/total)*100).toFixed(1);return ` ${c.label}: ฿${c.raw.toLocaleString()} (${p}%)`;} }}
+      }
+    }
+  });
+}
+
+function buildChange(cid, d=1) {
+  const chgs = MATS.map(m=>pctChg(m.id,d));
+  dc(cid);
+  CI[cid] = new Chart(document.getElementById(cid), {
+    type:'bar',
+    data:{
+      labels:MATS.map(m=>m.name),
+      datasets:[{
+        data:chgs,
+        backgroundColor:chgs.map(c=>c>0?'#fca5a5':'#86efac'),
+        borderColor:chgs.map(c=>c>0?'#dc2626':'#16a34a'),
+        borderWidth:1.5, borderRadius:4
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>` ${c.raw>0?'+':''}${c.raw.toFixed(2)}%`}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Sarabun',size:9},maxRotation:55}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Sarabun',size:10},callback:v=>(v>0?'+':'')+v.toFixed(1)+'%'}}
+      }
+    }
+  });
+}
+
+function buildBar(cid) {
+  const mats=MATS.filter(m=>m.ck==='paper'||m.ck==='ink');
+  dc(cid);
+  CI[cid] = new Chart(document.getElementById(cid), {
+    type:'bar',
+    data:{
+      labels:mats.map(m=>m.name),
+      datasets:[{
+        data:mats.map(m=>latest(m.id)),
+        backgroundColor:mats.map(m=>CAT_META[m.ck].clr+'bb'),
+        borderColor:mats.map(m=>CAT_META[m.ck].clr),
+        borderWidth:1.5, borderRadius:5
+      }]
+    },
+    options:{
+      responsive:true, maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:c=>{const m=mats[c.dataIndex];return ` ฿${fmtP(c.raw)} ${m.unit}`;}}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{family:'Sarabun',size:10},maxRotation:35}},
+        y:{grid:{color:'#f0f0f0'},ticks:{font:{family:'Sarabun',size:10},callback:v=>'฿'+v.toLocaleString()}}
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER KPI
+// ═══════════════════════════════════════════════════════
+function renderKPI() {
+  const ups=MATS.filter(m=>pctChg(m.id)>0.1).length;
+  const dns=MATS.filter(m=>pctChg(m.id)<-0.1).length;
+  const als=MATS.filter(m=>Math.abs(pctChg(m.id))>=THRESH[m.id]).length;
+  document.getElementById('sTotal').textContent=MATS.length;
+  document.getElementById('sUp').textContent=ups;
+  document.getElementById('sDn').textContent=dns;
+  document.getElementById('sAl').textContent=als;
+  if (als>0) {
+    document.getElementById('abar').classList.remove('hide');
+    document.getElementById('atxt').textContent='⚠️ ราคาเปลี่ยนแปลงเกิน threshold: '+MATS.filter(m=>Math.abs(pctChg(m.id))>=THRESH[m.id]).map(m=>m.name).join(', ');
+  }
+
+  // Group by category for colored KPI headers
+  const cats = ['paper','ink','foil','coating','other'];
+  let html = '';
+  cats.forEach(ck => {
+    const mats = MATS.filter(m=>m.ck===ck);
+    const meta = CAT_META[ck];
+    mats.forEach(m => {
+      const p=latest(m.id), ch=pctChg(m.id);
+      const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
+      const cls=ch>0.1?'up':ch<-0.1?'dn':'eq';
+      html += `<div class="kpi-card" style="border-top:3px solid ${meta.clr}">
+        <div class="kpi-cat" style="color:${meta.clr}">${meta.ico} ${meta.label}</div>
+        <div class="kpi-name">${m.ico} ${m.name}</div>
+        <div class="kpi-price" style="color:${meta.clr}">฿${fmtP(p)}</div>
+        <div class="kpi-unit">${m.unit}</div>
+        <div class="kpi-chg ${cls}">${arrow} ${Math.abs(ch).toFixed(2)}% จากเมื่อวาน</div>
+      </div>`;
+    });
+  });
+  document.getElementById('kpiGrid').innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER PRICE TABLE — by category sections
+// ═══════════════════════════════════════════════════════
+function renderPriceSections() {
+  const cats = ['paper','ink','foil','coating','other'];
+  let html = '';
+  cats.forEach(ck => {
+    const meta = CAT_META[ck];
+    const mats = MATS.filter(m=>m.ck===ck);
+    const rows = mats.map(m => {
+      const p=latest(m.id), p1=prev(m.id,1), p7=prev(m.id,7), ch=pctChg(m.id);
+      const cpCls=ch>0.1?'cup':ch<-0.1?'cdn':'ceq';
+      const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
+      const h15=HIST[m.id].slice(-15);
+      const minH=Math.min(...h15.map(h=>h.price)), maxH=Math.max(...h15.map(h=>h.price)), rng=maxH-minH||1;
+      const pts=h15.map((h,i)=>`${(i/(h15.length-1))*78},${26-((h.price-minH)/rng)*22}`).join(' ');
+      const spkClr=ch>0.1?'#dc2626':ch<-0.1?'#16a34a':'#9ca3af';
+      return `<tr>
+        <td><div class="mat-info">
+          <div class="mat-ico" style="background:${meta.clr}18">${m.ico}</div>
+          <div><div class="mat-nm">${m.name}</div><div class="mat-un">${m.unit}</div></div>
+        </div></td>
+        <td><span class="p-val" style="color:${meta.clr}">฿${fmtP(p)}</span></td>
+        <td><span class="chgp ${cpCls}">${arrow} ${Math.abs(ch).toFixed(2)}%</span></td>
+        <td style="color:var(--text2)">฿${fmtP(p1)}</td>
+        <td style="color:var(--text2)">฿${fmtP(p7)}</td>
+        <td><svg width="78" height="28" viewBox="0 0 78 28"><polyline points="${pts}" fill="none" stroke="${spkClr}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+        <td><button class="btn-edit" onclick="quickEdit('${m.id}')" title="แก้ไขราคา">✏️</button></td>
+      </tr>`;
+    }).join('');
+
+    html += `<div class="cat-section" id="catSec_${ck}">
+      <div class="cat-header" style="background:${meta.bg}" onclick="toggleCat('${ck}')">
+        <div class="cat-dot" style="background:${meta.clr}"></div>
+        <span class="cat-name-lbl" style="color:${meta.tc}">${meta.ico} ${meta.label}</span>
+        <span class="cat-count">${mats.length} รายการ</span>
+        <span class="cat-arrow" style="color:${meta.clr}">▼</span>
+      </div>
+      <div class="cat-body">
+        <div class="card">
+          <div style="overflow-x:auto">
+            <table class="ptbl">
+              <thead><tr>
+                <th>วัตถุดิบ</th><th>ราคาล่าสุด</th><th>เปลี่ยนแปลง</th>
+                <th>เมื่อวาน</th><th>7 วันที่แล้ว</th><th>Trend 15 วัน</th><th></th>
+              </tr></thead>
+              <tbody>${rows}</tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  });
+  document.getElementById('catSections').innerHTML = html;
+}
+
+function toggleCat(ck) {
+  document.getElementById('catSec_'+ck).classList.toggle('collapsed');
+}
+
+// ═══════════════════════════════════════════════════════
+// RENDER SUPPLIERS
+// ═══════════════════════════════════════════════════════
+function renderSuppliers() {
+  // Sources
+  document.getElementById('srcGrid').innerHTML = SOURCES.map(s => `
+    <div class="src-card">
+      <div class="src-ico">${s.ico}</div>
+      <div>
+        <div class="src-name">${s.name}</div>
+        <div class="src-desc">${s.desc}</div>
+        <div class="src-link">${s.url!=='#'?`<a href="${s.url}" target="_blank" rel="noopener">🔗 ${s.url}</a>`:'<span style="color:var(--text3)">—</span>'}</div>
+      </div>
+    </div>`).join('');
+
+  // Supplier sections
+  const div = document.getElementById('supSections');
+  let html = '';
+  Object.entries(SUPPLIERS).forEach(([ck, grp]) => {
+    const meta = CAT_META[ck];
+    html += `<div style="margin-bottom:1.75rem">
+      <div style="display:flex;align-items:center;gap:.65rem;margin-bottom:.9rem">
+        <div style="width:8px;height:8px;border-radius:50%;background:${meta.clr}"></div>
+        <h3 style="font-size:1rem;font-weight:800">${meta.ico} ${grp.label}</h3>
+        <span style="font-size:.75rem;color:var(--text3)">${grp.items.length} ซัพพลายเออร์</span>
+      </div>
+      <div class="sup-grid">
+        ${grp.items.map(s => {
+          const webLink = s.web !== '-' ? `<a href="https://${s.web}" target="_blank" rel="noopener">${s.web}</a>` : '<span style="color:var(--text3)">—</span>';
+          return `<div class="sup-card">
+            <div class="sup-top">
+              <div class="sup-cat-badge" style="background:${meta.bg};color:${meta.tc}">${meta.ico} ${grp.label}</div>
+              <div class="sup-name">${s.name}</div>
+              <div class="sup-short">${s.short}</div>
+            </div>
+            <div class="sup-body">
+              <div class="sup-row"><span class="sup-icon">📍</span><span class="sup-txt">${s.area}</span></div>
+              <div class="sup-row"><span class="sup-icon">📞</span><span class="sup-txt">${s.phone}</span></div>
+              <div class="sup-row"><span class="sup-icon">🌐</span><span class="sup-txt">${webLink}</span></div>
+            </div>
+            <div class="sup-tags">${s.products.map(p=>`<span class="stag">${p}</span>`).join('')}</div>
+            ${s.note?`<div class="sup-note">💬 ${s.note}</div>`:''}
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`;
+  });
+  html += `<p style="font-size:.72rem;color:var(--text3);text-align:center;padding:.5rem 0">
+    ⚠️ ข้อมูลติดต่อเป็นข้อมูลอ้างอิง ควรตรวจสอบความถูกต้องก่อนติดต่อ •
+    หมายเลขที่แสดง "xxx" ควรค้นหาเพิ่มเติมจากเว็บไซต์บริษัท
+  </p>`;
+  div.innerHTML = html;
+}
+
+// ═══════════════════════════════════════════════════════
+// UPDATE FORM
+// ═══════════════════════════════════════════════════════
+function renderUpdateForm() {
+  const sel = document.getElementById('upSel');
+  const cats = ['paper','ink','foil','coating','other'];
+  let opts = '<option value="">— เลือกวัตถุดิบ —</option>';
+  cats.forEach(ck => {
+    const meta = CAT_META[ck];
+    const mats = MATS.filter(m=>m.ck===ck);
+    opts += `<optgroup label="${meta.ico} ${meta.label}">`;
+    mats.forEach(m => { opts += `<option value="${m.id}">${m.name} (${m.unit})</option>`; });
+    opts += '</optgroup>';
+  });
+  sel.innerHTML = opts;
+
+  document.getElementById('alSet').innerHTML = MATS.map(m => `
+    <div class="al-item">
+      <span style="font-size:.85rem;font-weight:600">${m.ico} ${m.name}</span>
+      <div style="display:flex;align-items:center;gap:.4rem">
+        <span style="font-size:.73rem;color:var(--text3)">≥</span>
+        <input type="number" class="thr" id="thr_${m.id}" value="${THRESH[m.id]}" min="1" max="50"
+          onchange="THRESH['${m.id}']=+this.value">
+        <span style="font-size:.73rem;color:var(--text3)">%</span>
+      </div>
+    </div>`).join('');
+}
+
+function onPickMat() {
+  const id = document.getElementById('upSel').value;
+  if (!id) return;
+  const m = MATS.find(x=>x.id===id);
+  document.getElementById('upCur').value = `฿${fmtP(latest(id))} ${m.unit}`;
+  document.getElementById('upUnit').value = m.unit;
+  document.getElementById('upNew').value = latest(id).toFixed(m.base>=1?2:3);
+}
+
+function doUpdate() {
+  const id=document.getElementById('upSel').value;
+  const np=parseFloat(document.getElementById('upNew').value);
+  const note=document.getElementById('upNote').value;
+  if (!id||isNaN(np)||np<=0) { toast('กรุณาเลือกวัตถุดิบและกรอกราคาที่ถูกต้อง','err'); return; }
+  const m=MATS.find(x=>x.id===id), op=latest(id);
+  const today=new Date().toISOString().slice(0,10);
+  const h=HIST[id];
+  h.at(-1).date===today ? (h.at(-1).price=np) : h.push({date:today,price:np});
+  LOG.unshift({time:new Date().toLocaleString('th-TH'),mat:m.name,op,np,unit:m.unit,note});
+  renderKPI(); renderPriceSections(); rebuildCharts(); renderHistLog();
+  document.getElementById('upNote').value='';
+  document.getElementById('upCur').value=`฿${fmtP(np)} ${m.unit}`;
+  toast(`อัพเดท ${m.name} → ฿${fmtP(np)} เรียบร้อย`,'ok');
+}
+
+function quickEdit(id) {
+  goTab('update', document.querySelectorAll('.ntab')[4]);
+  document.getElementById('upSel').value=id;
+  onPickMat();
+  setTimeout(()=>document.getElementById('upNew').focus(),100);
+}
+
+function applyGlobal() {
+  const v=parseFloat(document.getElementById('gThr').value);
+  if (isNaN(v)||v<0) return;
+  MATS.forEach(m=>{ THRESH[m.id]=v; const e=document.getElementById(`thr_${m.id}`); if(e)e.value=v; });
+  toast(`ตั้ง threshold ${v}% ทุกรายการแล้ว`,'ok');
+}
+
+function renderHistLog() {
+  const div=document.getElementById('histLog');
+  if (!LOG.length) { div.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text3)">ยังไม่มีประวัติการอัพเดท</div>'; return; }
+  div.innerHTML=`<table class="hist-tbl">
+    <thead><tr><th>เวลา</th><th>วัตถุดิบ</th><th>ราคาเดิม</th><th>ราคาใหม่</th><th>%เปลี่ยน</th><th>หมายเหตุ</th></tr></thead>
+    <tbody>${LOG.map(r=>{
+      const ch=((r.np-r.op)/r.op)*100;
+      return `<tr>
+        <td style="color:var(--text3)">${r.time}</td>
+        <td style="font-weight:700">${r.mat}</td>
+        <td>฿${fmtP(r.op)} <span style="font-size:.68rem;color:var(--text3)">${r.unit}</span></td>
+        <td style="font-weight:800;color:${ch>0?'var(--red)':'var(--green)'}">฿${fmtP(r.np)}</td>
+        <td><span class="chgp ${ch>0?'cup':'cdn'}">${ch>0?'▲':'▼'} ${Math.abs(ch).toFixed(2)}%</span></td>
+        <td style="color:var(--text3)">${r.note||'—'}</td>
+      </tr>`;
+    }).join('')}</tbody>
+  </table>`;
+}
+
+// ═══════════════════════════════════════════════════════
+// EXPORT CSV
+// ═══════════════════════════════════════════════════════
+function doExport() {
+  const hdr=['วัตถุดิบ','หมวด','ราคาล่าสุด','หน่วย','%วันนี้','%7วัน','เมื่อวาน','7วันที่แล้ว'];
+  const rows=MATS.map(m=>[m.name,m.cat,latest(m.id),m.unit,pctChg(m.id).toFixed(2),pctChg(m.id,7).toFixed(2),prev(m.id,1),prev(m.id,7)]);
+  const csv='\uFEFF'+[hdr,...rows].map(r=>r.join(',')).join('\n');
+  const a=Object.assign(document.createElement('a'),{href:URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8'})),download:`printcost_${new Date().toISOString().slice(0,10)}.csv`});
+  a.click(); URL.revokeObjectURL(a.href);
+  toast('Export CSV เรียบร้อย','ok');
+}
+
+// ═══════════════════════════════════════════════════════
+// REFRESH
+// ═══════════════════════════════════════════════════════
+function doRefresh() {
+  const btn=document.getElementById('refBtn');
+  btn.classList.add('spin');
+  setTimeout(()=>{
+    const today=new Date().toISOString().slice(0,10);
+    MATS.forEach(m=>{
+      const h=HIST[m.id], lp=h.at(-1).price;
+      const np=Math.round(Math.max(m.base*0.75, lp+(Math.random()-0.47)*0.018*lp)*1000)/1000;
+      h.at(-1).date===today ? (h.at(-1).price=np) : h.push({date:today,price:np});
+    });
+    renderKPI(); renderPriceSections(); rebuildCharts();
+    updTime(); btn.classList.remove('spin');
+    toast('อัพเดทราคาล่าสุดเรียบร้อย','ok');
+  }, 1000);
+}
+
+// ═══════════════════════════════════════════════════════
+// NAV
+// ═══════════════════════════════════════════════════════
+function goTab(name, btn) {
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('sec-'+name).classList.add('on');
+  if (btn) btn.classList.add('on');
+  if (name==='charts') setTimeout(initChartsTab, 60);
+}
+
+function rebuildCharts() {
+  buildTrend('tC','tSel');
+  buildDonut('dC');
+  buildChange('chC',1);
+  if (document.getElementById('sec-charts').classList.contains('on')) initChartsTab();
+}
+
+function initChartsTab() {
+  buildTrend('tC2','tSel2');
+  buildBar('barC');
+  buildDonut('dC2');
+  buildChange('chC2',7);
+}
+
+// ═══════════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════════
+function init() {
+  updTime();
+  renderKPI();
+  renderPriceSections();
+  renderSuppliers();
+  renderUpdateForm();
+  renderHistLog();
+  setTimeout(()=>{ buildTrend('tC','tSel'); buildDonut('dC'); buildChange('chC',1); }, 120);
+}
+init();
+</script>
+</body>
+</html>

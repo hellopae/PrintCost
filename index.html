@@ -503,12 +503,47 @@
 // DATA — MATERIALS
 // ═══════════════════════════════════════════════════════
 const MATS = [
-  // กระดาษ
-  { id:'p1', name:'Art Card 260g',   cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:295,  ico:'📄' },
-  { id:'p2', name:'Art Card 350g',   cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:395,  ico:'📄' },
-  { id:'p3', name:'Offset 80g',      cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:178,  ico:'📃' },
-  { id:'p4', name:'Coated 115g',     cat:'กระดาษ', ck:'paper',   unit:'บาท/รีม',    base:228,  ico:'📃' },
-  { id:'p5', name:'Kraft',           cat:'กระดาษ', ck:'paper',   unit:'บาท/กก.',    base:48,   ico:'📦' },
+  // ── กระดาษ ART CARD (อาร์ตการ์ด) หน้ามันสองด้าน ─────────────────
+  { id:'p_ac_80',  name:'Art Card 80g',  subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:150, ico:'📄' },
+  { id:'p_ac_100', name:'Art Card 100g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:185, ico:'📄' },
+  { id:'p_ac_120', name:'Art Card 120g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:225, ico:'📄' },
+  { id:'p_ac_130', name:'Art Card 130g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:250, ico:'📄' },
+  { id:'p_ac_150', name:'Art Card 150g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:270, ico:'📄' },
+  { id:'p_ac_157', name:'Art Card 157g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:290, ico:'📄' },
+  { id:'p_ac_200', name:'Art Card 200g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:350, ico:'📄' },
+  { id:'p_ac_260', name:'Art Card 260g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:295, ico:'📄' },
+  { id:'p_ac_300', name:'Art Card 300g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:345, ico:'📄' },
+  { id:'p_ac_350', name:'Art Card 350g', subcat:'artcard', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:395, ico:'📄' },
+  // ── กระดาษ ART MATT (อาร์ตด้าน) หน้าด้านสองด้าน ────────────────
+  { id:'p_am_80',  name:'Art Matt 80g',  subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:155, ico:'📃' },
+  { id:'p_am_100', name:'Art Matt 100g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:190, ico:'📃' },
+  { id:'p_am_120', name:'Art Matt 120g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:230, ico:'📃' },
+  { id:'p_am_130', name:'Art Matt 130g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:255, ico:'📃' },
+  { id:'p_am_150', name:'Art Matt 150g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:275, ico:'📃' },
+  { id:'p_am_157', name:'Art Matt 157g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:310, ico:'📃' },
+  { id:'p_am_200', name:'Art Matt 200g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:365, ico:'📃' },
+  { id:'p_am_260', name:'Art Matt 260g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:310, ico:'📃' },
+  { id:'p_am_300', name:'Art Matt 300g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:360, ico:'📃' },
+  { id:'p_am_350', name:'Art Matt 350g', subcat:'artmatt', cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:410, ico:'📃' },
+  // ── กระดาษ COATED (อาร์ตมัน) บาง — นิตยสาร/แคตตาล็อก ──────────
+  { id:'p_co_80',  name:'Coated 80g',    subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:148, ico:'📋' },
+  { id:'p_co_100', name:'Coated 100g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:178, ico:'📋' },
+  { id:'p_co_115', name:'Coated 115g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:228, ico:'📋' },
+  { id:'p_co_120', name:'Coated 120g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:220, ico:'📋' },
+  { id:'p_co_130', name:'Coated 130g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:240, ico:'📋' },
+  { id:'p_co_150', name:'Coated 150g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:260, ico:'📋' },
+  { id:'p_co_157', name:'Coated 157g',   subcat:'coated',  cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:280, ico:'📋' },
+  // ── กระดาษ WOODFREE (ออฟเซ็ต/ปอนด์) — งานทั่วไป ────────────────
+  { id:'p_wf_60',  name:'Woodfree 60g',  subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:88,  ico:'📝' },
+  { id:'p_wf_70',  name:'Woodfree 70g',  subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:105, ico:'📝' },
+  { id:'p_wf_80',  name:'Woodfree 80g',  subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:128, ico:'📝' },
+  { id:'p_wf_90',  name:'Woodfree 90g',  subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:148, ico:'📝' },
+  { id:'p_wf_100', name:'Woodfree 100g', subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:165, ico:'📝' },
+  { id:'p_wf_120', name:'Woodfree 120g', subcat:'woodfree',cat:'กระดาษ', ck:'paper', unit:'บาท/รีม', base:195, ico:'📝' },
+  // ── กระดาษ KRAFT (คราฟท์) — บรรจุภัณฑ์/ซอง ─────────────────────
+  { id:'p_kr_70',  name:'Kraft 70g',     subcat:'kraft',   cat:'กระดาษ', ck:'paper', unit:'บาท/กก.', base:42,  ico:'📦' },
+  { id:'p_kr_80',  name:'Kraft 80g',     subcat:'kraft',   cat:'กระดาษ', ck:'paper', unit:'บาท/กก.', base:48,  ico:'📦' },
+  { id:'p_kr_90',  name:'Kraft 90g',     subcat:'kraft',   cat:'กระดาษ', ck:'paper', unit:'บาท/กก.', base:55,  ico:'📦' },
   // หมึกพิมพ์
   { id:'i1', name:'หมึก Cyan',       cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:398,  ico:'🔵' },
   { id:'i2', name:'หมึก Magenta',    cat:'หมึกพิมพ์', ck:'ink',  unit:'บาท/กก.',    base:415,  ico:'🔴' },
@@ -531,6 +566,15 @@ const MATS = [
 
 // Monthly cost estimate (for donut proportion)
 const MONTHLY = { paper:42000, ink:28000, foil:8500, coating:14000, other:5500 };
+
+// Sub-category meta for paper grouping
+const SUBCAT_META = {
+  artcard:  { label:'ART CARD (อาร์ตการ์ด)',        desc:'กระดาษอาร์ตการ์ด — ผิวมันสองด้าน เหมาะงานสิ่งพิมพ์คุณภาพสูง', clr:'#0ea5e9', ico:'📄' },
+  artmatt:  { label:'ART MATT (อาร์ตด้าน)',          desc:'กระดาษอาร์ตด้าน — ผิวนุ่มด้าน ลดแสงสะท้อน เหมาะงานหนังสือ', clr:'#8b5cf6', ico:'📃' },
+  coated:   { label:'COATED (อาร์ตมันบาง)',          desc:'กระดาษเคลือบบาง — สำหรับนิตยสาร แคตตาล็อก โบรชัวร์',        clr:'#10b981', ico:'📋' },
+  woodfree: { label:'WOODFREE (ออฟเซ็ต/ปอนด์)',     desc:'กระดาษออฟเซ็ต ปอนด์ — งานทั่วไป หนังสือ แบบฟอร์ม',         clr:'#f59e0b', ico:'📝' },
+  kraft:    { label:'KRAFT (คราฟท์)',                desc:'กระดาษคราฟท์ — ซอง ถุง บรรจุภัณฑ์ งานอุตสาหกรรม',          clr:'#92400e', ico:'📦' },
+};
 
 // Category meta
 const CAT_META = {
@@ -790,12 +834,16 @@ function buildDonut(cid) {
 }
 
 function buildChange(cid, d=1) {
-  const chgs = MATS.map(m=>pctChg(m.id,d));
+  // Show paper reps + non-paper for readability
+  const scOrder=['artcard','artmatt','coated','woodfree','kraft'];
+  const paperReps=scOrder.map(sc=>{const s=MATS.filter(m=>m.ck==='paper'&&m.subcat===sc);return s.find(m=>m.name.includes('100g'))||s[0];}).filter(Boolean);
+  const chartMats=[...paperReps,...MATS.filter(m=>m.ck!=='paper')];
+  const chgs = chartMats.map(m=>pctChg(m.id,d));
   dc(cid);
   CI[cid] = new Chart(document.getElementById(cid), {
     type:'bar',
     data:{
-      labels:MATS.map(m=>m.name),
+      labels:chartMats.map(m=>m.name),
       datasets:[{
         data:chgs,
         backgroundColor:chgs.map(c=>c>0?'#fca5a5':'#86efac'),
@@ -818,7 +866,13 @@ function buildChange(cid, d=1) {
 }
 
 function buildBar(cid) {
-  const mats=MATS.filter(m=>m.ck==='paper'||m.ck==='ink');
+  // For paper: one representative per subcat (100g or first); all inks
+  const scOrder=['artcard','artmatt','coated','woodfree','kraft'];
+  const paperReps = scOrder.map(sc=>{
+    const scM=MATS.filter(m=>m.ck==='paper'&&m.subcat===sc);
+    return scM.find(m=>m.name.includes('100g'))||scM.find(m=>m.name.includes('80g'))||scM[0];
+  }).filter(Boolean);
+  const mats=[...paperReps, ...MATS.filter(m=>m.ck==='ink')];
   dc(cid);
   CI[cid] = new Chart(document.getElementById(cid), {
     type:'bar',
@@ -861,24 +915,48 @@ function renderKPI() {
     document.getElementById('atxt').textContent='⚠️ ราคาเปลี่ยนแปลงเกิน threshold: '+MATS.filter(m=>Math.abs(pctChg(m.id))>=THRESH[m.id]).map(m=>m.name).join(', ');
   }
 
-  // Group by category for colored KPI headers
+  // Group by category; paper shows subcat summary cards
   const cats = ['paper','ink','foil','coating','other'];
   let html = '';
   cats.forEach(ck => {
     const mats = MATS.filter(m=>m.ck===ck);
     const meta = CAT_META[ck];
-    mats.forEach(m => {
-      const p=latest(m.id), ch=pctChg(m.id);
-      const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
-      const cls=ch>0.1?'up':ch<-0.1?'dn':'eq';
-      html += `<div class="kpi-card" style="border-top:3px solid ${meta.clr}">
-        <div class="kpi-cat" style="color:${meta.clr}">${meta.ico} ${meta.label}</div>
-        <div class="kpi-name">${m.ico} ${m.name}</div>
-        <div class="kpi-price" style="color:${meta.clr}">฿${fmtP(p)}</div>
-        <div class="kpi-unit">${m.unit}</div>
-        <div class="kpi-chg ${cls}">${arrow} ${Math.abs(ch).toFixed(2)}% จากเมื่อวาน</div>
-      </div>`;
-    });
+    if (ck === 'paper') {
+      // One card per subcat, using a representative weight (100g or first available)
+      const scOrder = ['artcard','artmatt','coated','woodfree','kraft'];
+      scOrder.forEach(sc => {
+        const scMats = mats.filter(m=>m.subcat===sc);
+        if (!scMats.length) return;
+        const scMeta = SUBCAT_META[sc];
+        // Pick 100g or 80g as representative; else first
+        const rep = scMats.find(m=>m.name.includes('100g')) || scMats.find(m=>m.name.includes('80g')) || scMats[0];
+        const p=latest(rep.id), ch=pctChg(rep.id);
+        const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
+        const cls=ch>0.1?'up':ch<-0.1?'dn':'eq';
+        const avgP = scMats.reduce((s,m)=>s+latest(m.id),0)/scMats.length;
+        html += `<div class="kpi-card" style="border-top:3px solid ${scMeta.clr}">
+          <div class="kpi-cat" style="color:${scMeta.clr}">${scMeta.ico} ${meta.label}</div>
+          <div class="kpi-name">${scMeta.label}</div>
+          <div class="kpi-price" style="color:${scMeta.clr}">฿${fmtP(p)}</div>
+          <div class="kpi-unit">${rep.unit} (ตัวแทน: ${rep.name.replace(/\D+/,'').trim()})</div>
+          <div class="kpi-chg ${cls}">${arrow} ${Math.abs(ch).toFixed(2)}% จากเมื่อวาน</div>
+          <div style="font-size:.68rem;color:var(--text3);margin-top:.3rem">เฉลี่ย ${scMats.length} น้ำหนัก: ฿${fmtP(avgP)}</div>
+        </div>`;
+      });
+    } else {
+      mats.forEach(m => {
+        const p=latest(m.id), ch=pctChg(m.id);
+        const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
+        const cls=ch>0.1?'up':ch<-0.1?'dn':'eq';
+        html += `<div class="kpi-card" style="border-top:3px solid ${meta.clr}">
+          <div class="kpi-cat" style="color:${meta.clr}">${meta.ico} ${meta.label}</div>
+          <div class="kpi-name">${m.ico} ${m.name}</div>
+          <div class="kpi-price" style="color:${meta.clr}">฿${fmtP(p)}</div>
+          <div class="kpi-unit">${m.unit}</div>
+          <div class="kpi-chg ${cls}">${arrow} ${Math.abs(ch).toFixed(2)}% จากเมื่อวาน</div>
+        </div>`;
+      });
+    }
   });
   document.getElementById('kpiGrid').innerHTML = html;
 }
@@ -886,33 +964,74 @@ function renderKPI() {
 // ═══════════════════════════════════════════════════════
 // RENDER PRICE TABLE — by category sections
 // ═══════════════════════════════════════════════════════
+function makeMatRow(m, clr) {
+  const p=latest(m.id), p1=prev(m.id,1), p7=prev(m.id,7), ch=pctChg(m.id);
+  const cpCls=ch>0.1?'cup':ch<-0.1?'cdn':'ceq';
+  const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
+  const h15=HIST[m.id].slice(-15);
+  const minH=Math.min(...h15.map(h=>h.price)), maxH=Math.max(...h15.map(h=>h.price)), rng=maxH-minH||1;
+  const pts=h15.map((h,i)=>`${(i/(h15.length-1))*78},${26-((h.price-minH)/rng)*22}`).join(' ');
+  const spkClr=ch>0.1?'#dc2626':ch<-0.1?'#16a34a':'#9ca3af';
+  return `<tr>
+    <td><div class="mat-info">
+      <div class="mat-ico" style="background:${clr}18">${m.ico}</div>
+      <div><div class="mat-nm">${m.name}</div><div class="mat-un">${m.unit}</div></div>
+    </div></td>
+    <td><span class="p-val" style="color:${clr}">฿${fmtP(p)}</span></td>
+    <td><span class="chgp ${cpCls}">${arrow} ${Math.abs(ch).toFixed(2)}%</span></td>
+    <td style="color:var(--text2)">฿${fmtP(p1)}</td>
+    <td style="color:var(--text2)">฿${fmtP(p7)}</td>
+    <td><svg width="78" height="28" viewBox="0 0 78 28"><polyline points="${pts}" fill="none" stroke="${spkClr}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
+    <td><button class="btn-edit" onclick="quickEdit('${m.id}')" title="แก้ไขราคา">✏️</button></td>
+  </tr>`;
+}
+
 function renderPriceSections() {
   const cats = ['paper','ink','foil','coating','other'];
   let html = '';
   cats.forEach(ck => {
     const meta = CAT_META[ck];
     const mats = MATS.filter(m=>m.ck===ck);
-    const rows = mats.map(m => {
-      const p=latest(m.id), p1=prev(m.id,1), p7=prev(m.id,7), ch=pctChg(m.id);
-      const cpCls=ch>0.1?'cup':ch<-0.1?'cdn':'ceq';
-      const arrow=ch>0.1?'▲':ch<-0.1?'▼':'—';
-      const h15=HIST[m.id].slice(-15);
-      const minH=Math.min(...h15.map(h=>h.price)), maxH=Math.max(...h15.map(h=>h.price)), rng=maxH-minH||1;
-      const pts=h15.map((h,i)=>`${(i/(h15.length-1))*78},${26-((h.price-minH)/rng)*22}`).join(' ');
-      const spkClr=ch>0.1?'#dc2626':ch<-0.1?'#16a34a':'#9ca3af';
-      return `<tr>
-        <td><div class="mat-info">
-          <div class="mat-ico" style="background:${meta.clr}18">${m.ico}</div>
-          <div><div class="mat-nm">${m.name}</div><div class="mat-un">${m.unit}</div></div>
-        </div></td>
-        <td><span class="p-val" style="color:${meta.clr}">฿${fmtP(p)}</span></td>
-        <td><span class="chgp ${cpCls}">${arrow} ${Math.abs(ch).toFixed(2)}%</span></td>
-        <td style="color:var(--text2)">฿${fmtP(p1)}</td>
-        <td style="color:var(--text2)">฿${fmtP(p7)}</td>
-        <td><svg width="78" height="28" viewBox="0 0 78 28"><polyline points="${pts}" fill="none" stroke="${spkClr}" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></td>
-        <td><button class="btn-edit" onclick="quickEdit('${m.id}')" title="แก้ไขราคา">✏️</button></td>
-      </tr>`;
-    }).join('');
+    let bodyHtml = '';
+
+    if (ck === 'paper') {
+      // Group paper by subcat
+      const scOrder = ['artcard','artmatt','coated','woodfree','kraft'];
+      scOrder.forEach(sc => {
+        const scMats = mats.filter(m=>m.subcat===sc);
+        if (!scMats.length) return;
+        const scMeta = SUBCAT_META[sc];
+        const rows = scMats.map(m=>makeMatRow(m, scMeta.clr)).join('');
+        bodyHtml += `
+          <div style="margin-bottom:1.25rem">
+            <div style="display:flex;align-items:center;gap:.6rem;padding:.55rem .85rem;background:${scMeta.clr}10;border-left:3px solid ${scMeta.clr};border-radius:0 6px 6px 0;margin-bottom:.4rem">
+              <span style="font-size:1rem">${scMeta.ico}</span>
+              <div>
+                <span style="font-size:.88rem;font-weight:800;color:${scMeta.clr}">${scMeta.label}</span>
+                <span style="font-size:.72rem;color:var(--text3);margin-left:.6rem">${scMats.length} น้ำหนัก — ${scMeta.desc}</span>
+              </div>
+            </div>
+            <div style="overflow-x:auto">
+              <table class="ptbl">
+                <thead><tr>
+                  <th>วัตถุดิบ</th><th>ราคาล่าสุด</th><th>เปลี่ยนแปลง</th>
+                  <th>เมื่อวาน</th><th>7 วันที่แล้ว</th><th>Trend 15 วัน</th><th></th>
+                </tr></thead>
+                <tbody>${rows}</tbody>
+              </table>
+            </div>
+          </div>`;
+      });
+    } else {
+      const rows = mats.map(m=>makeMatRow(m, meta.clr)).join('');
+      bodyHtml = `<div style="overflow-x:auto"><table class="ptbl">
+        <thead><tr>
+          <th>วัตถุดิบ</th><th>ราคาล่าสุด</th><th>เปลี่ยนแปลง</th>
+          <th>เมื่อวาน</th><th>7 วันที่แล้ว</th><th>Trend 15 วัน</th><th></th>
+        </tr></thead>
+        <tbody>${rows}</tbody>
+      </table></div>`;
+    }
 
     html += `<div class="cat-section" id="catSec_${ck}">
       <div class="cat-header" style="background:${meta.bg}" onclick="toggleCat('${ck}')">
@@ -921,19 +1040,7 @@ function renderPriceSections() {
         <span class="cat-count">${mats.length} รายการ</span>
         <span class="cat-arrow" style="color:${meta.clr}">▼</span>
       </div>
-      <div class="cat-body">
-        <div class="card">
-          <div style="overflow-x:auto">
-            <table class="ptbl">
-              <thead><tr>
-                <th>วัตถุดิบ</th><th>ราคาล่าสุด</th><th>เปลี่ยนแปลง</th>
-                <th>เมื่อวาน</th><th>7 วันที่แล้ว</th><th>Trend 15 วัน</th><th></th>
-              </tr></thead>
-              <tbody>${rows}</tbody>
-            </table>
-          </div>
-        </div>
-      </div>
+      <div class="cat-body"><div class="card" style="padding:1rem">${bodyHtml}</div></div>
     </div>`;
   });
   document.getElementById('catSections').innerHTML = html;
